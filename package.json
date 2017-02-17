@@ -1,0 +1,18 @@
+{
+  "name": "stela-nodejs",
+  "version": "1.0.0",
+  "description": "Node.js client api for communicating with Stela server",
+  "main": "api.js",
+  "dependencies": {
+    "google-protobuf": "^3.2.0",
+    "grpc": "^1.1.2"
+  },
+  "devDependencies": {
+    "tape": "^4.6.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jesse Lucas <jesse@forestgiant.com>",
+  "license": "Apache-2.0"
+}
