@@ -3,7 +3,6 @@ const grpc = require('grpc');
 const messages = require('./stela_pb');
 const services = require('./stela_grpc_pb');
 
-
 class StelaClient {
   /**
    * Creates a new stela client used to communicate with a stela server via gRPC.
@@ -114,15 +113,16 @@ class StelaClient {
   unsubscribe(serviceName) {
     return new Promise((resolve, reject) => {
       if (!serviceName || serviceName == '') {
-        reject(Error("You must provide a serviceName to unsubscribe"));
+        reject(Error('You must provide a serviceName'));
         return;
       }
 
-      const request = new messages.UnsubscribeRequest();
+      const request = new messages.SubscribeRequest();
       request.setClientId(this.id);
+      request.setServiceName(serviceName);
       this.rpc.unsubscribe(request, (err, response) => {
         if (err) {
-          reject(Error("Failed to unsubscribe: " + err));
+          reject(Error('Failed to unsubscribe: ' + err));
           return;
         } else {
           // Remove key from callback
@@ -141,7 +141,7 @@ class StelaClient {
   registerService(service) {
     return new Promise((resolve, reject) => {
       if (!service) {
-        reject(Error("You must provide a service to register"));
+        reject(Error('You must provide a service to register'));
         return;
       }
 
@@ -155,13 +155,12 @@ class StelaClient {
       request.setService(service);
       this.rpc.register(request, (err, response) => {
         if (err) {
-          reject(Error("Failed to registerService: " + err));
+          reject(Error('Failed to registerService: ' + err));
           return;
         } else {
           resolve();
         }
       });
-
     });
   }
 
@@ -172,45 +171,122 @@ class StelaClient {
    */
   deregisterService(service) {
     return new Promise((resolve, reject) => {
+      if (!service) {
+        reject(Error('You must provide a service to register'));
+        return;
+      }
+      service.setHostname(this.hostname);
 
-      resolve();
+      const request = new messages.RegisterRequest();
+      request.setClientId(this.id);
+      request.setService(service);
+      this.rpc.deregister(request, (err, response) => {
+        if (err) {
+          reject(Error('Failed to deregisterService: ' + err));
+          return;
+        } else {
+          resolve();
+        }
+      });
     });
   }
 
   /**
    * discover services registered with the same service name.
+   * @param {string} serviceName The name of the services you want to discover.
+   * @return {Promise.ServiceMessage[]}
    */
-  discover() {
+  discover(serviceName) {
     return new Promise((resolve, reject) => {
+      if (!serviceName || serviceName == '') {
+        reject(Error('You must provide a serviceName'));
+        return;
+      }
 
-      resolve();
+      const request = new messages.DiscoverRequest();
+      request.setServiceName(serviceName);
+      this.rpc.discover(request, (err, response) => {
+        if (err) {
+          reject(Error("Failed to discover: " + err));
+          return;
+        } else {
+          resolve(response.getServicesList());
+        }
+      });
     });
   }
 
-  //
-  discoverRegex() {
+  /**
+   * discoverRegex finds services by name based on a regular expression.
+   * @param {string} reg The regular expression you want to match against the service name.
+   * @return {Promise.ServiceMessage[]}
+   */
+  discoverRegex(reg) {
     return new Promise((resolve, reject) => {
+      if (!reg || reg == '') {
+        reject(Error('You must provide a regular expression'));
+        return;
+      }
 
-      resolve();
+      const request = new messages.DiscoverRequest();
+      request.setServiceName(reg);
+      this.rpc.discoverRegex(request, (err, response) => {
+        if (err) {
+          reject(Error("Failed to discover: " + err));
+          return;
+        } else {
+          resolve(response.getServicesList());
+        }
+      });
     });
   }
 
-  //
-  discoverOne() {
+  /**
+   * discoverOne finds a single instance of a service based on name.
+   * @param {string} serviceName The name of the services you want to discover.
+   * @return {Promise.ServiceMessage}
+   */
+  discoverOne(serviceName) {
     return new Promise((resolve, reject) => {
+      if (!serviceName || serviceName == '') {
+        reject(Error('You must provide a regular expression'));
+        return;
+      }
 
-      resolve();
+      const request = new messages.DiscoverRequest();
+      request.setServiceName(serviceName);
+      this.rpc.discoverOne(request, (err, response) => {
+        if (err) {
+          reject(Error("Failed to discover: " + err));
+          return;
+        } else {
+          resolve(response);
+        }
+      });
     });
   }
 
-  //
+  /**
+   * discoverAll finds all services registered.
+   * @return {Promise.ServiceMessage[]}
+   */
   discoverAll() {
     return new Promise((resolve, reject) => {
-
-      resolve();
+      const request = new messages.DiscoverAllRequest();
+      this.rpc.discoverAll(request, (err, response) => {
+        if (err) {
+          reject(Error("Failed to discoverAll: " + err));
+          return;
+        } else {
+          resolve(response.getServicesList());
+        }
+      });
     });
   }
 
+  /**
+   * close cancels the stream to the gRPC stream established by connect().
+   */
   close() {
     return new Promise((resolve, reject) => {
       if (!this.connectStream) {
@@ -223,6 +299,9 @@ class StelaClient {
   }
 }
 
+/**
+* externalIP finds the external ip address of the computer the client is running on.
+*/
 function externalIP() {
   var addrs = os.networkInterfaces();
   var address = '127.0.0.1';
@@ -243,4 +322,34 @@ function externalIP() {
   return address;
 }
 
+/**
+ * servicesEqual tests if two ServiceMessage are equal
+ * @param {messages.ServiceMessage} a First service.
+ * @param {messages.ServiceMessage} b Second service.
+ * @return {boolean}
+ */
+function servicesEqual(a, b) {
+  if (!a || !b) {
+    return Error("Must supply two services to test");
+  }
+
+  if (a.getName() != b.getName()) {
+    return false;
+  }
+  if (a.getHostname() != b.getHostname()) {
+    return false;
+  }
+  if (a.getIpv4() != b.getIpv4()) {
+    return false;
+  }
+  if (a.getIpv6() != b.getIpv6()) {
+    return false;
+  }
+  if (a.getPort() != b.getPort()) {
+    return false;
+  }
+  return true;
+}
+
+StelaClient.servicesEqual = servicesEqual;
 module.exports = StelaClient;
