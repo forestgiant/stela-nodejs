@@ -58,7 +58,7 @@ test('Test subscribe, register, and unsubscribe', function (t) {
             t.equal(client.callbacks.get(serviceName), subscribeCallback);
 
             // Register service
-            return client.registerService(service);
+            return client.register(service);
         }).then(() => {
             // Now verify our subscription callback worked
             t.equal(returnedName, serviceName);
@@ -66,7 +66,7 @@ test('Test subscribe, register, and unsubscribe', function (t) {
             // Unsubscribe
             return client.unsubscribe(serviceName);
         }).then(() => {
-            return client.deregisterService(service);
+            return client.deregister(service);
         }).then(() => {
             // We're finished close the client connect stream
             return client.close();
@@ -94,7 +94,7 @@ test('Test deregister and discover', function (t) {
     client.connect()
         .then(() => {
             // Register service
-            return client.registerService(service);
+            return client.register(service);
         }).then(() => {
             // Discover to make sure the service was registered
             return client.discover(serviceName);
@@ -109,7 +109,7 @@ test('Test deregister and discover', function (t) {
             // Verify that the service returned is the one we registered
             t.equal(stela_api.servicesEqual(services[0], service), true);
 
-            return client.deregisterService(service);
+            return client.deregister(service);
         }).then(() => {
             // Discover to make sure the service was deregistered
             // This should error
@@ -151,7 +151,7 @@ test('Test discoverRegex', function (t) {
     client.connect()
         .then(() => {
             // Register service
-            return client.registerService(service);
+            return client.register(service);
         }).then(() => {
             // discoverRegex
             return client.discoverRegex("testDiscoverReg.*");
@@ -167,7 +167,7 @@ test('Test discoverRegex', function (t) {
             t.equal(stela_api.servicesEqual(services[0], service), true);
 
             // deregister service
-            return client.deregisterService(service);
+            return client.deregister(service);
         }).then(() => {
             // We're finished close the client connect stream
             return client.close();
@@ -195,7 +195,7 @@ test('Test discoverOne', function (t) {
     client.connect()
         .then(() => {
             // Register service
-            return client.registerService(service);
+            return client.register(service);
         }).then(() => {
             // discoverOne
             return client.discoverOne(serviceName);
@@ -208,7 +208,7 @@ test('Test discoverOne', function (t) {
             t.equal(stela_api.servicesEqual(returnedService, service), true);
 
             // deregister service
-            return client.deregisterService(service);
+            return client.deregister(service);
         }).then(() => {
             // We're finished close the client connect stream
             return client.close();
@@ -244,7 +244,7 @@ test('Test discoverAll', function (t) {
         .then(() => {
             var registerPromises = [];
             testServices.forEach(function (item, index, array) {
-                registerPromises.push(client.registerService(item));
+                registerPromises.push(client.register(item));
             });
 
             // Register test services
@@ -264,7 +264,7 @@ test('Test discoverAll', function (t) {
             // deregister services
             var deregisterPromises = [];
             testServices.forEach(function (item, index, array) {
-                deregisterPromises.push(client.deregisterService(item));
+                deregisterPromises.push(client.deregister(item));
             });
 
             // Register test services

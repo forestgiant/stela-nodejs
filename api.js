@@ -134,11 +134,11 @@ class StelaClient {
   }
 
   /**
-   * registerService registers a service to the stela instance the client is connected to.
+   * register a service to the stela instance the client is connected to.
    * @param {messages.ServiceMessage} service The service to be registered.
    * @return {Promise}
    */
-  registerService(service) {
+  register(service) {
     return new Promise((resolve, reject) => {
       if (!service) {
         reject(Error('You must provide a service to register'));
@@ -165,11 +165,11 @@ class StelaClient {
   }
 
   /**
-   * deregisterService deregisters a service to the stela instance the client is connected to.
+   * deregister a service to the stela instance the client is connected to.
    * @param {messages.ServiceMessage} service The service to be registered.
    * @return {Promise}
    */
-  deregisterService(service) {
+  deregister(service) {
     return new Promise((resolve, reject) => {
       if (!service) {
         reject(Error('You must provide a service to register'));
