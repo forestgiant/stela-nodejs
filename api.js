@@ -293,6 +293,7 @@ class StelaClient {
         reject(Error("Client isn't connected"));
       }
 
+      console.log("exit");
       this.connectStream.cancel();
       resolve();
     });
@@ -351,5 +352,22 @@ function servicesEqual(a, b) {
   return true;
 }
 
+/**
+ * Actions are used to know if a service is being registered or 
+ * deregistered in a subscription callback.
+ * @enum
+ */
+const actions = {
+  RegisterAction: 0,
+  DeregisterAction: 1,
+};
+
+/**
+ * DefaultStelaAddress is the address the stela server will run on by default.
+ */
+const defaultStelaAddress = "127.0.0.1:31000";
+
+StelaClient.actions = actions;
+StelaClient.defaultStelaAddress = defaultStelaAddress;
 StelaClient.servicesEqual = servicesEqual;
 module.exports = StelaClient;

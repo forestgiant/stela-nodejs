@@ -3,7 +3,7 @@ const stela_api = require('./api.js');
 const messages = require('./stela_pb');
 const os = require('os');
 
-const stelaAddress = 'localhost:31000';
+const stelaAddress = stela_api.defaultStelaAddress;
 
 test('Test connect', function (t) {
     const client = new stela_api(stelaAddress, '');
@@ -45,7 +45,9 @@ test('Test subscribe, register, and unsubscribe', function (t) {
     service.setPort(10000);
     var returnedName = '';
     const subscribeCallback = (service) => {
-        returnedName = service.getName();
+        if (service.getAction() == stela_api.actions.RegisterAction) {
+            returnedName = service.getName();
+        }
     };
 
     client.connect()
@@ -115,13 +117,18 @@ test('Test deregister and discover', function (t) {
         }).catch(error => {
             // discover should error since there are no services registred under that serviceName
             if (!error) {
-                t.fail();
+                t.fail("discover should have errored");
             }
-
+            console.log("close in test");
+            // We're finished close the client connect stream
+            return client.close();
+        }).then(() => {
+            console.log("close in test then");
             // We're finished close the client connect stream
             return client.close();
         }).then(() => {
             // Client closed, end test
+            console.log("close in test end");
             t.end();
         }).catch(error => {
             console.log(error);
@@ -249,8 +256,6 @@ test('Test discoverAll', function (t) {
             if (!services) {
                 t.fail("services is null");
             }
-
-            console.log(services.length);
 
             // Verify that the service returned contain the ones we registered
             // Add one to totalRegistered because stela instances register themselve
