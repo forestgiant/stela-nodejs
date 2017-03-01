@@ -40,13 +40,17 @@ test('Test subscribe, register, and unsubscribe', function (t) {
     const serviceName = 'testSubscribe.services.fg';
     const client = new stela_api(stelaAddress, '');
     const service = new messages.ServiceMessage();
+    const value = 'test value';
     service.setName(serviceName);
     service.setIpv4('127.0.0.1');
     service.setPort(10000);
+    service.setValue(Buffer.from(value).toString('base64'));
     var returnedName = '';
     const subscribeCallback = (service) => {
         if (service.getAction() == stela_api.actions.RegisterAction) {
             returnedName = service.getName();
+            returnedValue = Buffer.from(service.getValue()).toString();
+            t.equal(returnedValue, value);
         }
     };
 
