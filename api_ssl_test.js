@@ -1,5 +1,5 @@
 /**
- * Test for stela server running in insecure mode
+ * Test for stela server running in TLS mode
  */
 
 const test = require('tape');
@@ -10,7 +10,7 @@ const os = require('os');
 const stelaAddress = stela_api.defaultStelaAddress;
 
 test('Test connect', function (t) {
-    const client = new stela_api(stelaAddress);
+    const client = new stela_api(stelaAddress, 'ca.crt', 'client.key', 'client.crt');
     client.connect()
         .then(() => {
             // Check if client is nil
@@ -42,7 +42,7 @@ test('Test connect', function (t) {
 
 test('Test subscribe, register, and unsubscribe', function (t) {
     const serviceName = 'testSubscribe.services.fg';
-    const client = new stela_api(stelaAddress);
+    const client = new stela_api(stelaAddress, 'ca.crt', 'client.key', 'client.crt');
     const service = new messages.ServiceMessage();
     const value = 'test value';
     service.setName(serviceName);
@@ -93,7 +93,7 @@ test('Test subscribe, register, and unsubscribe', function (t) {
 
 test('Test deregister and discover', function (t) {
     const serviceName = 'testRegister.services.fg';
-    const client = new stela_api(stelaAddress);
+    const client = new stela_api(stelaAddress, 'ca.crt', 'client.key', 'client.crt');
     const service = new messages.ServiceMessage();
     service.setName(serviceName);
     service.setIpv4('127.0.0.1');
@@ -147,7 +147,7 @@ test('Test deregister and discover', function (t) {
 
 test('Test discoverRegex', function (t) {
     const serviceName = 'testDiscoverRegex.services.fg';
-    const client = new stela_api(stelaAddress);
+   const client = new stela_api(stelaAddress, 'ca.crt', 'client.key', 'client.crt');
     const service = new messages.ServiceMessage();
     service.setName(serviceName);
     service.setIpv4('127.0.0.1');
@@ -191,7 +191,7 @@ test('Test discoverRegex', function (t) {
 
 test('Test discoverOne', function (t) {
     const serviceName = 'testDiscoverRegex.services.fg';
-    const client = new stela_api(stelaAddress);
+    const client = new stela_api(stelaAddress, 'ca.crt', 'client.key', 'client.crt');
     const service = new messages.ServiceMessage();
     service.setName(serviceName);
     service.setIpv4('127.0.0.1');
@@ -231,7 +231,7 @@ test('Test discoverOne', function (t) {
 });
 
 test('Test discoverAll', function (t) {
-    const client = new stela_api(stelaAddress);
+    const client = new stela_api(stelaAddress, 'ca.crt', 'client.key', 'client.crt');
     var testServices = [];
     var totalRegistered = 5;
     for (i = 0; i < totalRegistered; i++) {

@@ -1,4 +1,5 @@
 const os = require('os');
+const fs = require('fs');
 const grpc = require('grpc');
 const messages = require('./stela_pb');
 const services = require('./stela_grpc_pb');
@@ -10,17 +11,21 @@ class StelaClient {
    * @param {string} caFile - Certificate authority file to use for gRPC connections.
    * @constructor
    */
-  constructor(serverAddress, caFile) {
+  constructor(serverAddress, caFile, keyFile, certFile) {
     this.serverAddress = serverAddress;
     this.hostname = os.hostname();
     this.address = externalIP();
     this.callbacks = new Map(); // a map of callback functions keyed by serviceName
 
     // Check if a caFile was passed, if not use insecure connection
-    if (!caFile || caFile == '') {
+    if (!certFile || certFile.length === 0) {
       this.creds = grpc.credentials.createInsecure();
     } else {
-      this.creds = grpc.credentials.createSsl(caFile);
+      this.creds = grpc.credentials.createSsl(
+        fs.readFileSync(caFile),
+        fs.readFileSync(keyFile),
+        fs.readFileSync(certFile)
+      );
     }
   }
 
@@ -35,7 +40,10 @@ class StelaClient {
         reject(Error("You must provide a server address to connect to."));
         return;
       }
-      this.rpc = new services.StelaClient(this.serverAddress, this.creds);
+      var options = {
+        'grpc.ssl_target_name_override': 'Stela',
+      };
+      this.rpc = new services.StelaClient(this.serverAddress, this.creds, options);
       const clientRequest = new messages.AddClientRequest();
       clientRequest.setClientAddress(this.address);
       this.rpc.addClient(clientRequest, (err, response) => {
