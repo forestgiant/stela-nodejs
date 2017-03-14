@@ -288,15 +288,16 @@ class StelaClient {
    * close cancels the stream to the gRPC stream established by connect().
    */
   close() {
-    return new Promise((resolve, reject) => {
-      if (!this.connectStream) {
-        reject(Error("Client isn't connected"));
-      }
-
-      console.log("exit");
+    if (this.connectStream) {
       this.connectStream.cancel();
-      resolve();
-    });
+      this.connectStream = null;
+    }
+
+    this.serverAddress = null;
+    this.hostname = null;
+    this.address = null;
+    this.callbacks = null;
+    this.creds = null;
   }
 }
 

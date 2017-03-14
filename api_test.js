@@ -123,16 +123,13 @@ test('Test deregister and discover', function (t) {
             if (!error) {
                 t.fail("discover should have errored");
             }
-            console.log("close in test");
             // We're finished close the client connect stream
             return client.close();
         }).then(() => {
-            console.log("close in test then");
             // We're finished close the client connect stream
             return client.close();
         }).then(() => {
             // Client closed, end test
-            console.log("close in test end");
             t.end();
         }).catch(error => {
             console.log(error);
