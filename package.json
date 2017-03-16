@@ -1,8 +1,12 @@
 {
   "name": "stela-nodejs",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Node.js client api for communicating with Stela server",
   "main": "api.js",
+    "repository": {
+    "type": "git",
+    "url": "git://github.com/forestgiant/stela-nodejs.git"
+  },
   "dependencies": {
     "google-protobuf": "^3.2.0",
     "grpc": "^1.1.2"
@@ -11,7 +15,8 @@
     "tape": "^4.6.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node api_test.js",
+    "test_ssl": "node api_ssl_test.js"
   },
   "author": "Jesse Lucas <jesse@forestgiant.com>",
   "license": "Apache-2.0"
